@@ -1,80 +1,63 @@
 package pekan1_2511532016;
-import java.util.Scanner;
-public class JamDriver2_2511532016 {
 
-	public static void main(String[] args) {
-		Scanner input = new Scanner(System.in);
-		System.out.println("=== Program Driver Objek Jam ===");
-		// 1. Input Jam Pertama
-		System.out.println("\n--- Input Jam 1 ---");
-		Jam_2511532016 j1 = buatJamDariInput(input);
-		
-		// 2. Input Jam Pertama
-		System.out.println("\n--- Input Jam 2 ---");
-		Jam_2511532016 j2 = buatJamDariInput(input);
-			
-		
-		//3. Menampilkan Data
-		System.out.println("\n--- Hasil Operasi ---");
-		System.out.println("Jam 1 (String)          :  " + j1.toString());
-		System.out.println("Jam 2 (String)          :  " + j2.toString());
-		System.out.println("Jam 1 (String)          :  " + j1.toSeconds());
-		System.out.println("Jam 2 (String)          :  " + j2.toSeconds());
-		
-		
-		// 4. Operasi Relasional (Perbandingan)
-		int perbandingan = j1.compareTo(j2);
-		if(perbandingan > 0 ) {
-			System.out.println("Status          	:  Jam 1 lebih lambat (setelah) Jam 2");
-			
-		}
-		else if(perbandingan < 0 ) {
-			System.out.println("Status           	:  Jam 2 lebih lambat (setelah) Jam 1");
-		}
-		else System.out.println("Status            	:  Jam 1 dan Jam 2 sama persis");
-		
-		
-	
-		
-		// 5. Operasi Aritmatika
-		System.out.println("Durasi (J1 ke J2)       :  " + Jam_2511532016.durasiDetik(j1, j2) + " detik");
-		
-		Jam_2511532016 jNext = j1.nextSecond();
-		System.out.println("Jam 1 Detik Berikutnya  :  " + jNext);
-		Jam_2511532016 jPrev = j1.prevSecond();
-		System.out.println("Jam 1 Detik Berikutnya  :  " + jPrev);
-		
-		//6. Operasi Penjumlahan Jam
-		Jam_2511532016 jHasilPlus = j1.plus(j2);
-		System.out.println("Hasil J1 + J2           :  " + jHasilPlus);
-		
-		input.close();
-		System.out.println("\nProgram Selesai.");
-	}
-	/**
-	 * Prosedur pembantu untuk melakukan inout dan validasi secara berulang
-	 * sampai user memasukkan angka yang benar (0..23, 0...59)
-	 */
-	
-	private static Jam_2511532016 buatJamDariInput(Scanner sc) {
-		int h, m ,s;
-		while(true) {
-			System.out.print("Masukkan Jam (0-23)    :");
-			h = sc.nextInt();
-			System.out.print("Masukkan Menit (0-59)  :");
-			m = sc.nextInt();
-			System.out.print("Masukkan Detik (0-59)  :");
-			s = sc.nextInt();
-			
-			//Memanggil method static isValid dari kelas Jam
-			if (Jam_2511532016.isValid(h, m, s)) {
-				return new Jam_2511532016(h,m,s);
-			}
-			else System.out.println("[Error] Input tidak valid! Silahkan ulangi.\n");
-		}
-	}
-	
-		
+public final class Jam_2511532016 {
+	private int hh; //0...23
+	private int mm; //0...59
+	private int ss; //0...59
 
+	//---Validator---
+	public static boolean isValid(int h, int m, int s){
+		return (h>=0 && h<=23) && (m>=0 && m<=59) && (s>=0 && s<=59);
+	}
+
+	//---Konstruktor---
+	public Jam_2511532016(int h, int m, int s){
+		this.hh = h; this.mm=m; this.ss=s;
+	}
+
+	//---Selektor---
+	public int getHour(){return hh;}
+	public int getMinute(){return mm;}
+	public int getSecond(){return ss;}
+
+	//---Mutator---
+	public void setHour(int h){this.hh = h;}
+	public void setMinute(int m){this.mm = m;}
+	public void setSecond(int s){this.ss = s;}
+
+	//Konversi
+	public int toSeconds(){return hh*3600 + mm*60 + ss;}
 	
-}
+	public static Jam_2511532016 fromSeconds(int total){
+		if(total <0 ) throw new IllegalArgumentException("Detik Negatif!");
+		total %= 24*3600; 
+		int h = total/3600; total %=3600; 
+		int m = total/60; int s = total%60;
+		return new Jam_2511532016(h,m,s);
+	}
+	//---Relasional---
+	public int compareTo(Jam_2511532016 other){ 
+		return Integer.compare(this.toSeconds(),other.toSeconds());}
+	
+	public boolean equals(Object o){
+		if(!(o instanceof Jam_2511532016 j)) return false;		
+		return hh == j.hh && mm == j.mm && ss == j.ss;
+	}
+	public int hashCode() {
+		return java.util.Objects.hash(hh,mm,ss);}
+
+	//---Aritmatika---
+	public Jam_2511532016 plus(Jam_2511532016 other){return fromSeconds(this.toSeconds() + other.toSeconds());}
+	public Jam_2511532016 minus(Jam_2511532016 other){return fromSeconds(this.toSeconds() - other.toSeconds());}
+	public Jam_2511532016 nextSecond(){return fromSeconds(this.toSeconds() + 1);}
+	public Jam_2511532016 nextNSecond(int n){ return fromSeconds(this.toSeconds() + Math.max(0,n));}
+	public Jam_2511532016 prevSecond() {return fromSeconds(Math.floorMod(this.toSeconds() -1, 24*3600));}
+	public Jam_2511532016 prevNSecond(int n){ return fromSeconds(Math.floorMod(this.toSeconds() - Math.max(0,n), 24*3600));}
+
+	//--- Durasi (detik) -- bisa negatif jika this > other? sesuai spesifikasi durasi (JAw, JAkh)
+	public static int durasiDetik(Jam_2511532016 JAw, Jam_2511532016 JAkh){	
+	return JAkh.toSeconds() - JAw.toSeconds();}
+
+	//Overriding ke string
+	public String toString(){ 
+	return String.format("%02d:%02d:%02d", hh,mm,ss);}}
